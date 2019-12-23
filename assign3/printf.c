@@ -40,8 +40,9 @@ int vsnprintf(char *buf, int bufsize, const char *format, va_list args){
 }
 
 int snprintf(char *buf, int bufsize, const char *format, ...) __attribute__ ((format (printf, 3, 4))){
-    //TODO:differentiate between the %p %d and %x and also to clean up the code a lil bit
+    //TODO:clean up a little bit and refractor in vsnprintf
     int count = 0;
+    int padding = 0;
     va_list ap;
     va_start(ap,format);
 
@@ -66,11 +67,27 @@ int snprintf(char *buf, int bufsize, const char *format, ...) __attribute__ ((fo
                     format++;
                     break;
                 default:
-                    //offset = strlcat((buf+count), "0x",3) + signed_to_base(buf+count+2, bufsize-count-1, va_arg(ap,int), 16, strtonum(format,&ptr)-2);
-                    offset = signed_to_base(buf+count, bufsize-count-1, va_arg(ap,int), 10, strtonum(format,&ptr));
-                    count+= offset;
-                    format+= (ptr-format)+1;
-                break;
+                    padding = strtonum(format, &ptr);
+                    switch(*ptr){
+                        case 'x':
+                            offset = strlcat((buf+count), "0x",3) + unsigned_to_base(buf+count+2, bufsize-count-1, va_arg(ap,int), 16, padding-2);
+                            count += offset;
+                            format += ptr-format+1;
+                            break;
+                        case 'd':
+                            offset = signed_to_base(buf+count, bufsize-count-1, va_arg(ap,int), 10, padding);
+                            count+= offset;
+                            format+= (ptr-format)+1;
+                            break;
+                        case 'p':
+                            offset = strlcat((buf+count), "0x",3) + unsigned_to_base(buf+count+2, bufsize-count-1, va_arg(ap,long), 16, 12);
+                            count += offset;
+                            format += ptr-format+1;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
             }
         }
 
@@ -80,6 +97,7 @@ int snprintf(char *buf, int bufsize, const char *format, ...) __attribute__ ((fo
     *(buf+count) = '\0';
     return count;
 }
+
 
 int printf(const char *format, ...) __attribute__ ((format (printf, 1, 2))){
     //TODO:to implement
