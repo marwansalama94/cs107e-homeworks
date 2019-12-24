@@ -1,6 +1,39 @@
 #include "strings.h"
 
-void *memset(void *s, int c, size_t n){
+ static unsigned int strtonum_hex(const char *str,const char **endptr){
+     unsigned int num = 0;
+     str+= 2;
+     while(*str){
+         num<<= 4;//a place to get the new 4 bits
+         if(*str >= '0' && *str <='9'){
+             num += ((*str)-'0');
+         }else if (*str >= 'A' && *str <='F'){
+             num += 10+((*str)-'A');
+         }else if (*str >= 'a' && *str <='f'){
+             num += 10+((*str)-'a');
+         }else{
+             *endptr = str;
+             break;
+         }
+         str++;
+     }
+     return num;
+ }
+
+ static unsigned int strtonum_decimal(const char *str, const char** endptr){
+     unsigned int num = 0;
+     while(*str){
+         if(*str >= '0' && *str <='9'){
+             num*= 10;
+             num += *str-'0';
+         }else{
+             *endptr = str;
+             break;
+         }
+         str++;
+     }
+     return num;
+ }void *memset(void *s, int c, size_t n){
     for (size_t i = 0; i < n ; i++){
       *( ((unsigned char*)s) + i) = (unsigned char)c;
     }
@@ -34,40 +67,6 @@ int strcmp(const char *s1, const char *s2){
     return *s1 - *s2;
 }
 
-static unsigned int strtonum_hex(const char *str,const char **endptr){
-    unsigned int num = 0;
-    str+= 2;
-    while(*str){
-        num<<= 4;//a place to get the new 4 bits
-        if(*str >= '0' && *str <='9'){
-            num += ((*str)-'0');
-        }else if (*str >= 'A' && *str <='F'){
-            num += 10+((*str)-'A');
-        }else if (*str >= 'a' && *str <='f'){
-            num += 10+((*str)-'a');
-        }else{
-            *endptr = str;
-            break;
-        }
-        str++;
-    }
-    return num;
-}
-
-static unsigned int strtonum_decimal(const char *str, const char** endptr){
-    unsigned int num = 0;
-    while(*str){
-        if(*str >= '0' && *str <='9'){
-            num*= 10;
-            num += *str-'0';
-        }else{
-            *endptr = str;
-            break;
-        }
-        str++;
-    }
-    return num;
-}
 
 unsigned int strtonum(const char *str, const char **endptr){
     if( str[0] == '0' && (str[1] == 'x' || str[1] == 'X') ){
