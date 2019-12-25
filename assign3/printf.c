@@ -69,6 +69,11 @@ int vsnprintf(char *buf, int bufsize, const char *format, va_list args){
                     count+= strlcat(buf+count,va_arg(args,char*),bufsize-count-1);
                     format++;
                     break;
+                case '%':
+                    *(buf+count) = *(format);
+                    format++;
+                    count++;
+                    break;    
                 default:
                     padding = strtonum(format, &ptr);
                     switch(*ptr){
