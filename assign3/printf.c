@@ -12,11 +12,12 @@ static unsigned int offset_calc(int digit_count, int bufsize, int min_width){
     }
 }
 
-static unsigned int digits_count(unsigned int val){
+
+static unsigned int digits_count(unsigned int val,int base){
     unsigned int count = 0;
     while(val){
         count++;
-        val/= 10;
+        val/= base;
     }
     return (count > 0 )? count: 1;
 }
@@ -24,11 +25,11 @@ static unsigned int digits_count(unsigned int val){
 int unsigned_to_base(char *buf, int bufsize, unsigned long int val, int base, int min_width){
     unsigned int ncount = 0;
     int offset;
-    int digit_count = digits_count(val);
+    int digit_count = digits_count(val, base);
     if(!bufsize)return 0;
     offset = offset_calc(digit_count, bufsize, min_width);
     for (int i = 1 ; i <= offset; i++){
-        *(buf+offset-i) = ((val%base)<10)? '0'+ val % base : 'A'+ (val%base)%10 ;
+        *(buf+offset-i) = ((val%base)<10)? '0'+ val % base : 'a'+ (val%base)%10 ;
         val /= base;
         ncount++;
     }
@@ -66,7 +67,8 @@ int vsnprintf(char *buf, int bufsize, const char *format, va_list args){
                     count++;
                     break;
                 case 's':
-                    count+= strlcat(buf+count,va_arg(args,char*),bufsize-count-1);
+                    *(buf+count) ='\0';
+                    count = strlcat(buf,va_arg(args,char*),bufsize);
                     format++;
                     break;
                 case '%':
@@ -78,7 +80,9 @@ int vsnprintf(char *buf, int bufsize, const char *format, va_list args){
                     padding = strtonum(format, &ptr);
                     switch(*ptr){
                         case 'x':
-                            offset = strlcat((buf+count), "0x",3) + unsigned_to_base(buf+count+2, bufsize-count-1, va_arg(args,int), 16, padding-2);
+                            *(buf+count) = '\0';
+                            count = strlcat(buf,"0x",bufsize);
+                            offset = unsigned_to_base(buf+count, bufsize-count-1, va_arg(args,int), 16, padding-2);
                             count += offset;
                             format += ptr-format+1;
                             break;
@@ -88,7 +92,9 @@ int vsnprintf(char *buf, int bufsize, const char *format, va_list args){
                             format+= (ptr-format)+1;
                             break;
                         case 'p':
-                            offset = strlcat((buf+count), "0x",3) + unsigned_to_base(buf+count+2, bufsize-count-1, va_arg(args,long), 16, 12);
+                            *(buf+count) = '\0';
+                            count = strlcat(buf,"0x",bufsize);
+                            offset = unsigned_to_base(buf+count, bufsize-count-1, va_arg(args,int), 16, padding);
                             count += offset;
                             format += ptr-format+1;
                             break;
