@@ -26,11 +26,10 @@ void *malloc(size_t nbytes){
     void* ptr = NULL;
     nbytes = roundup(nbytes,8);
     //hdr_p start_header = (hdr_p)heap_start;
-    timer_delay(2);
     //printf("the heap_start = %d",*((int*)heap_start));
     //init the heap
     hdr_p start_header = (hdr_p)heap_start;
-    if( start_header->payload_size > heap_size){
+    if(!start_header->payload_size || start_header->payload_size > heap_size){
         printf("got initialized\n");
         start_header->payload_size = heap_size-sizeof(hdr);
         start_header->status = 0;
