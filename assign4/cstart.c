@@ -11,11 +11,9 @@ void _cstart(void)
 {
     int *bss = &__bss_start__;
     int *bss_end = &__bss_end__;
-
     while (bss < bss_end) {
         *bss++ = 0;
     }
-
     main();
 
 //    // Turn on the green ACT LED (GPIO 47)

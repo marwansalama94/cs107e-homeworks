@@ -3,54 +3,38 @@
 #include "libs/timer.h"
 #include "libs/uart.h"
 #include "backtrace.h"
-
-int abs(int v)
-{
-    int result = v < 0 ? -v : v;
-    return result;
-}
-
-int factorial(int n)
-{
-    if (n <= 1)
-        return 1;
-    else
-        return n*factorial(n-1);
-}
-
-int make_array(void)
-{
-    int array[6];
-
-    array[0] = 1;
-    for (int i = 0; i < 5; i++)
-        array[i+1] = array[i] + 2;
-    return abs(array[3]);
-}
-
-int diff(int a, int b)
-{
-    return abs(a - b);
-}
-
-int submain(void){
-    int x = 33, y = 107;
-    int d = diff(x, y);
-    int f = factorial(7);
-    int n = make_array();
-    return d + f + n;
-}
+#include "malloc.h"
 
 int main(void)
 {
+    
     gpio_init();
     timer_init();
     uart_init();
-    gpio_set_input(GPIO_PIN20);
+    int* a;
+    int* b;
+    int* c;
+    int* d;
+    int* e;
+    int* f;
+    int* g;
+    a = (int*)malloc(10);
+    b = (int*)malloc(8);
+    c = (int*)malloc(20);
+    d = (int*)malloc(4);
+    e = (int*)malloc(7);
+    f = (int*)malloc(40);
+    g = (int*)malloc(8);
     while(1){
-            printf("from main()\n");
-            print_backtrace();
-            //submain();
-            timer_delay(5);
+        printf("malloc test:\n ============\n");
+        printf("a malloc(10) returns:%p\n",a);
+        printf("b malloc(8) returns:%p\n",b);
+        printf("c malloc(20) returns:%p\n",c);
+        printf("d malloc(4) returns:%p\n",d);
+        printf("e malloc(7) returns:%p\n",e);
+        printf("f malloc(40) returns:%p\n",f);
+        printf("g malloc(25) returns:%p\n",g);
+        printf("====================\n");
+        timer_delay(5);
     }
 }

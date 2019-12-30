@@ -2,7 +2,7 @@
 ARMGNU ?= aarch64-none-elf
 
 AOPS = --warn --fatal-warnings
-COPS = -g -Wall -Og -std=gnu99 -nostartfiles -ffreestanding -fno-omit-frame-pointer
+COPS = -g -Wall -Og -std=gnu99 -nostartfiles -ffreestanding
 
 gcc : app.bin
 
@@ -43,8 +43,12 @@ uart.o : libs/uart.c
 backtrace.o : backtrace.c
 	$(ARMGNU)-gcc $(COPS) -c backtrace.c -o backtrace.o
 
-app.bin : memmap start.o gpio.o app.o cstart.o timer.o backtrace.o strings.o printf.o uart.o
-	$(ARMGNU)-ld start.o cstart.o libs/gpio.o libs/timer.o libs/strings.o libs/printf.o backtrace.o libs/uart.o app.o -T memmap -o app.elf
+malloc.o : malloc.c
+	$(ARMGNU)-gcc $(COPS) -c malloc.c -o malloc.o
+
+
+app.bin : memmap malloc.o start.o gpio.o app.o cstart.o timer.o backtrace.o strings.o printf.o uart.o
+	$(ARMGNU)-ld start.o cstart.o libs/gpio.o libs/timer.o libs/strings.o libs/printf.o backtrace.o malloc.o libs/uart.o app.o -T memmap -o app.elf
 	$(ARMGNU)-objdump -D app.elf > app.list
 	$(ARMGNU)-objcopy app.elf -O binary app.bin
 
