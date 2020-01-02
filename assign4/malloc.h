@@ -9,6 +9,7 @@
  */
 #include <stddef.h> // for size_t
 
+void heapdump();
 
 /* Function: malloc
  * ----------------
