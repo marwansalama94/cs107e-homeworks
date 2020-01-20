@@ -1,7 +1,7 @@
 #include "malloc.h"
-#include "libs/printf.h"
-#include "libs/timer.h"
-#include "libs/strings.h"
+#include "strings.h"
+#include "printf.h"
+
 #ifndef NULL
 #define NULL 0
 #endif
@@ -9,7 +9,7 @@
 
 #define roundup(x,n) (((x)+((n)-1))&(~((n)-1)))
 //gonna change to 16MB once finished testing
-#define heap_size 96
+#define heap_size 512
 
 extern int __bss_end__;
 
@@ -44,8 +44,6 @@ void *malloc(size_t nbytes){
         heap_start = (char*)start_header;
         start_header->payload_size = heap_size-sizeof(hdr);
         start_header->status = 0;
-        printf("the heap address:%p\n",heap_start);
-        heapdump();
     }
 
     //process the request
@@ -70,20 +68,20 @@ void *malloc(size_t nbytes){
 }
 
 void free(void *ptr){
-   hdr_p start_header = ((hdr_p)((char*)ptr - sizeof(hdr)));
-   start_header->status = 0;
-   size_t cur_free_size = start_header->payload_size;
-   start_header = (hdr_p)((char*)start_header + start_header->payload_size);//go one node to the right
-   while((char*)start_header < heap_start+heap_size && !start_header->status){
-       cur_free_size += start_header->payload_size + sizeof(hdr);
-       start_header = (hdr_p)((char*)start_header + start_header->payload_size);
-       if(!start_header->payload_size){
-           start_header = (hdr_p)((char*)start_header+sizeof(hdr));
-           //cur_free_size -= sizeof(hdr);
-       }
-   }
-   start_header = ((hdr_p)((char*)ptr - sizeof(hdr)));
-   start_header->payload_size = cur_free_size - sizeof(hdr);
+    hdr_p start_header = (hdr_p)((char*)ptr - sizeof(hdr));
+    start_header->status = 0;
+
+    unsigned int free_size = start_header->payload_size;
+    start_header = (hdr_p)((char*)ptr + start_header->payload_size);// gone one node to the right
+
+    while(((char*)start_header +  sizeof(hdr)) < heap_start + heap_size){
+        if(!start_header->status)break;
+        free_size += start_header->payload_size + sizeof(hdr);
+        start_header = (hdr_p)((char*)start_header + sizeof(hdr) + start_header->payload_size);
+    }
+    start_header = (hdr_p)((char*)ptr - sizeof(hdr));
+    start_header->payload_size = free_size;
+ 
 }
 
 void *realloc(void *ptr, size_t new_size){
