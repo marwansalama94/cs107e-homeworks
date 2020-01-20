@@ -48,12 +48,18 @@ void *malloc(size_t nbytes){
 
     //process the request
     while( (char*)start_header < heap_start + heap_size){
-        if (start_header->payload_size >= nbytes && !start_header->status ){
+        if (start_header->payload_size >= nbytes && start_header->status != 1 ){
+            
             if(((char*)start_header + sizeof(hdr) + nbytes) <= heap_start + heap_size && start_header->payload_size > 8)
                 ((hdr_p)((char*)start_header + sizeof(hdr) + nbytes))->payload_size = start_header->payload_size - (nbytes+sizeof(hdr));
+            
+            if( !(nbytes + sizeof(hdr) == start_header->payload_size )){
+                start_header->payload_size = nbytes;
+
+            }
             //start_header = (hdr_p)((char*)start_header + start_header->payload_size);
             start_header->status = 1;
-            start_header->payload_size = nbytes;
+            //start_header->payload_size = nbytes;
             
             ptr = (char*)start_header + sizeof(hdr);
             break;
@@ -74,8 +80,8 @@ void free(void *ptr){
     unsigned int free_size = start_header->payload_size;
     start_header = (hdr_p)((char*)ptr + start_header->payload_size);// gone one node to the right
 
-    while(((char*)start_header +  sizeof(hdr)) < heap_start + heap_size){
-        if(!start_header->status)break;
+    while(((char*)start_header +  sizeof(hdr)) <= heap_start + heap_size){
+        if(start_header->status)break;
         free_size += start_header->payload_size + sizeof(hdr);
         start_header = (hdr_p)((char*)start_header + sizeof(hdr) + start_header->payload_size);
     }
