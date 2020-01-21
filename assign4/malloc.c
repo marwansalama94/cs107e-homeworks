@@ -115,7 +115,7 @@ void *realloc(void *ptr, size_t new_size){
             ptr = malloc(new_size);
             if (ptr){
                 ptr = memcpy(ptr, temp, ((hdr_p)((char*)temp-sizeof(hdr)))->payload_size);
-                ((hdr_p)((char*)temp-sizeof(hdr)))->status = 0;
+                free(temp);
             }
         }
     } 
